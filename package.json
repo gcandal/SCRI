@@ -1,0 +1,23 @@
+{
+  "name": "SCRI",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gcandal/SCRI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gcandal/SCRI/issues"
+  },
+  "homepage": "https://github.com/gcandal/SCRI",
+  "dependencies": {
+    "express": "^4.12.3",
+    "express-session": "^1.11.2"
+  }
+}

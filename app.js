@@ -3,19 +3,30 @@
 var express = require('express');
 var session = require('express-session');
 var app = express();
-var nrVersions = 3;
+var timeVersions = 3;
 
 app.locals.results = [
     {'a': 1, 'b': 1, 'c': 1},
     {'a': 1, 'b': 1}
 ];
 
+app.locals.time = 0;
+app.locals.decisions = [];
+
 app.use(session({
     secret: 'Oix',
     resave: true,
     saveUninitialized: true
 }));
+var decisionsToString = function(decisions) {
+    var result = "";
 
+    history.forEach(function (elem, n) {
+        result += "Iteration " + n + ": " + elem + "\n";
+    });
+
+    return result;
+};
 var historyToString = function (history) {
     var result = "";
 
@@ -37,10 +48,12 @@ var canDecide = function (historyLine) {
         if (historyLine.hasOwnProperty(session))
             count += 1;
 
-    return count === nrVersions;
+    return count === timeVersions;
 };
 
 var combine = function (historyLine) {
+    app.locals.decisions.push(0);
+
     return 0;
 };
 
@@ -49,21 +62,35 @@ var allocateSpace = function (iteration, history) {
         history.push({});
 };
 
-app.get('/:nr/:value', function (req, res) {
-    var nr = parseInt(req.params.nr);
+app.get('/:time/:value', function (req, res) {
+    var time = parseInt(req.params.time);
 
-    allocateSpace(nr, app.locals.results);
+    allocateSpace(time, app.locals.results);
 
-    app.locals.results[nr][req.sessionID] = req.params.value;
+    app.locals.results[time][req.sessionID] = req.params.value;
 
-    var currentLine = app.locals.results[nr];
+    var currentLine = app.locals.results[time];
 
     if (canDecide(currentLine))
-        console.log("Iteration " + nr + " decided: " + combine(currentLine));
+        res.send("Iteration " + time + " decided: " + combine(currentLine));
     else
-        console.log("Iteration " + nr + " has not enogh significant data");
+        res.send("Iteration " + time + " has not enough significant data to make a decision");
+});
 
+app.get('/history', function (req, res) {
     res.send('<pre>' + historyToString(app.locals.results) + '</pre>');
+});
+
+app.get('/decisions', function (req, res) {
+    res.send('<pre>' + decisionsToString(app.locals.decisions) + '</pre>');
+});
+
+app.get('/reset', function (req, res) {
+    app.locals.results = [];
+    app.locals.time = 0;
+    app.locals.decisions = [];
+
+    res.send("State back to initial");
 });
 
 app.listen(1337, function () {

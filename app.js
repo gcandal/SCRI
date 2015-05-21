@@ -86,9 +86,14 @@ var combine = function (values) {
     return formalMajorityVoter(values);
 };
 
-var allocateSpace = function (iteration, history) {
+var allocateSpaceHistory = function (iteration, history) {
     while (history.length < iteration + 1)
         history.push({});
+};
+
+var allocateSpaceDecisions = function (iteration, history) {
+    while (history.length < iteration + 1)
+        history.push("FAIL");
 };
 
 app.get('/history', function (req, res) {
@@ -116,14 +121,16 @@ app.get('/decide/:time', function (req, res) {
     if (time < app.locals.decisions.length)
         return res.send("Decision for that time has already been made, and was " + app.locals.decisions[time]);
 
+    allocateSpaceDecisions(time, app.locals.decisions);
+
     try {
         var decision = combine(extractValuesFromLine(app.locals.results[time]));
         res.send("Iteration " + time + " decided: " + decision);
-        app.locals.decisions.push(decision);
+        app.locals.decisions[time] = decision;
     }
     catch (err) {
         res.send("Iteration " + time + " has not enough significant data to make a decision or couldn't reach consensus");
-        app.locals.decisions.push("FAIL");
+        app.locals.decisions[time] = "FAIL";
     }
 });
 
@@ -141,7 +148,7 @@ app.get('/:id/:time/:value', function (req, res) {
     if (time < app.locals.decisions.length)
         return res.send("Decision for that time has already been made, and was " + app.locals.decisions[time]);
 
-    allocateSpace(time, app.locals.results);
+    allocateSpaceHistory(time, app.locals.results);
 
     if (app.locals.results[time].hasOwnProperty(sessionID))
         return res.send("Previous value of " + app.locals.results[time][sessionID]

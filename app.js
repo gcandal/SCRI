@@ -79,7 +79,16 @@ var formalMajorityVoter = function (values) {
     if (admissible.length < 2)
         throw "Couldn't decide";
 
-    return pickRandomFromArray(admissible);
+    var decision = pickRandomFromArray(admissible);
+
+    if(!acceptanceTest(decision))
+        throw "Couldn't decide";
+
+    return decision;
+};
+
+var acceptanceTest = function(decision) {
+   return decision >= 0 && decision <=  48;
 };
 
 var combine = function (values) {
@@ -139,10 +148,10 @@ app.get('/:id/:time/:value', function (req, res) {
     var value = parseFloat(req.params.value);
     var sessionID = req.params.id; // req.sessionID;
 
-    if (time < 0 || time.toString() === 'NaN')
-        return res.send("Invalid time value");
+    if (time.toString() === 'NaN' || time < 0)
+        return res.send("Invalid time");
 
-    if (value.toString() === 'NaN')
+    if (value.toString() === 'NaN' || value < 0)
         return res.send("Invalid value");
 
     if (time < app.locals.decisions.length)
@@ -150,13 +159,13 @@ app.get('/:id/:time/:value', function (req, res) {
 
     allocateSpaceHistory(time, app.locals.results);
 
+    app.locals.results[time][sessionID] = value;
+
     if (app.locals.results[time].hasOwnProperty(sessionID))
         return res.send("Previous value of " + app.locals.results[time][sessionID]
         + " replaced by " + value + " for ID " + sessionID);
 
-    app.locals.results[time][sessionID] = value;
-
-    res.send("Previous value of " + value + " set for ID " + sessionID);
+    res.send("Value of " + value + " set for ID " + sessionID);
 });
 
 app.listen(1337, function () {

@@ -81,14 +81,14 @@ var formalMajorityVoter = function (values) {
 
     var decision = pickRandomFromArray(admissible);
 
-    if(!acceptanceTest(decision))
+    if (!acceptanceTest(decision))
         throw "Couldn't decide";
 
     return decision;
 };
 
-var acceptanceTest = function(decision) {
-   return decision >= 0 && decision <=  48;
+var acceptanceTest = function (decision) {
+    return decision >= 0 && decision <= 48;
 };
 
 var combine = function (values) {
@@ -151,7 +151,7 @@ app.get('/:id/:time/:value', function (req, res) {
     if (time.toString() === 'NaN' || time < 0)
         return res.send("Invalid time");
 
-    if (value.toString() === 'NaN' || value < 0)
+    if (value.toString() === 'NaN')
         return res.send("Invalid value");
 
     if (time < app.locals.decisions.length)
